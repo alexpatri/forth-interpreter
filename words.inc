@@ -38,11 +38,11 @@ native "=", is_equal
     cmp rax, [rsp]
     je .equal
 
-    mov byte [rsp], 0
+    mov qword [rsp], 0
     jmp next
 
     .equal:
-    mov byte [rsp], 1
+    mov qword [rsp], 1
     jmp next
 
 native "<", is_less
@@ -50,11 +50,11 @@ native "<", is_less
     cmp rax, [rsp]
     jl .less
 
-    mov byte [rsp], 0
+    mov qword [rsp], 0
     jmp next
 
     .less:
-    mov byte [rsp], 1
+    mov qword [rsp], 1
     jmp next
 
 native "not", not
@@ -167,6 +167,10 @@ native "inbuf", inbuf
     push qword input_buffer
     jmp next
 
+native "state", state
+    push qword state
+    jmp next
+
 native "lit", lit
     push qword [pc]
     add pc, 8
@@ -221,14 +225,15 @@ native "create", create
     
     pop rdi
     push rsi
-    call string_copy 
+    call string_copy
     pop rsi
     push rsi
     mov rdi, rsi
     call strlen
     pop rsi
     add rsi, rax
-    
+
+    ; flags
     inc rsi
     pop rax
     mov [rsi], al
@@ -259,3 +264,84 @@ colon "or", or
     dq xt_and
     dq xt_not
     dq xt_exit
+
+colon ":", colon
+    .read:
+    dq xt_inbuf
+    dq xt_word
+    branch0 .read
+    dq xt_lit, 0
+    dq xt_inbuf
+    dq xt_create
+    dq xt_state
+    dq xt_lit, 1
+    dq xt_store
+    dq xt_lit, xt_docol
+    dq xt_comma
+    dq xt_exit
+
+colon ";", semicolon, 1
+    dq xt_state
+    dq xt_lit, 0
+    dq xt_store
+    dq xt_lit, xt_exit
+    dq xt_comma
+    dq xt_exit
+
+native "init", init
+    mov rstack, rstack_start
+    mov [stack_base], rsp
+    jmp i_interpreter
+
+; quando é lido uma palavra:
+; pc contem o mesmo que program_stub
+; ou seja o primeiro elemento é o xt da palavra a ser executada e o segundo é o xt do interpreter
+; quando se soma 8 pc passa a conter, no primeiro elemento o xt do interpreter
+;
+; quando next vem de uma palavra:
+; pc contem xt do interpreter, dessa forma o `jump [w]` pula para o interpreter
+;
+; é dessa forma que funciona o loop do interpretador
+i_interpreter:
+    mov rdi, input_buffer
+    call read_word
+
+    cmp rax, 0
+    jz .exit
+
+    mov rdi, rax 
+    mov rsi, last_word
+    call find_word
+
+    test rax, rax
+    jz .number
+
+    mov rdi, rax
+    call code_from_addr
+
+    ; move o xt da palavra lida para program_stub
+    ; move program_stub para pc e pula para next
+    mov [program_stub], rax
+    mov pc, program_stub
+    jmp next
+
+.number:
+    mov rdi, input_buffer
+    call parse_int
+    test rdx, rdx
+    jz .not_found
+
+    push rax
+
+    jmp i_interpreter
+
+.exit:
+    xor rdi, rdi
+    jmp exit
+
+.not_found:
+    mov rdi, error_msg
+    call print
+    call print_newline
+
+    jmp i_interpreter

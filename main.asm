@@ -21,10 +21,10 @@ section .data
     ; sedundo o xt do interpretador (é dessa forma que é feito o loop em next)
     program_stub: dq 0
     xt_interpreter: dq .interpreter
-    .interpreter: dq interpreter_loop
+    .interpreter: dq i_interpreter
 
     ; necessário para modo de compilação
-    state: db 0
+    state: dq 0
     here: dq dict_memory
     last_word: dq LAST_WORD
 
@@ -41,63 +41,10 @@ section .bss
 section .text
 global _start
 
-; quando é lido uma palavra:
-; pc contem o mesmo que program_stub
-; ou seja o primeiro elemento é o xt da palavra a ser executada e o segundo é o xt do interpreter
-; quando se soma 8 pc passa a conter, no primeiro elemento o xt do interpreter
-;
-; quando next vem de uma palavra:
-; pc contem xt do interpreter, dessa forma o `jump [w]` pula para o interpreter
-;
-; é dessa forma que funciona o loop do interpretador
 next:
     mov w, [pc]
     add pc, 8
     jmp [w]
 
-_start:
-    mov rstack, rstack_start
-    mov [stack_base], rsp
+_start: jmp i_init
 
-interpreter_loop:
-    mov rdi, input_buffer
-    call read_word
-
-    cmp rax, 0
-    jz .exit
-
-    mov rdi, rax 
-    mov rsi, last_word
-    call find_word
-
-    test rax, rax
-    jz .number
-
-    mov rdi, rax
-    call code_from_addr
-
-    ; move o xt da palavra lida para program_stub
-    ; move program_stub para pc e pula para next
-    mov [program_stub], rax
-    mov pc, program_stub
-    jmp next
-
-.number:
-    mov rdi, input_buffer
-    call parse_int
-    test rdx, rdx
-    jz .not_found
-
-    push rax
-    jmp interpreter_loop
-
-.exit:
-    xor rdi, rdi
-    jmp exit
-
-.not_found:
-    mov rdi, error_msg
-    call print
-    call print_newline
-
-    jmp interpreter_loop
