@@ -242,6 +242,13 @@ native "create", create
     mov [here], rsi
     jmp next
 
+native "find", find
+    pop rdi
+    mov rsi, last_word
+    call find_word
+    push rax
+    jmp next
+
 colon ">", is_greater
     dq xt_swap
     dq xt_is_less
@@ -345,3 +352,5 @@ i_interpreter:
     call print_newline
 
     jmp i_interpreter
+
+
