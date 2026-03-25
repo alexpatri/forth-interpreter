@@ -267,6 +267,11 @@ native "number", number
     push rdx
     jmp next
 
+native "print", print
+    pop rdi
+    call print
+    jmp next
+
 native "exec", exec
     pop rax
     mov w, rax
