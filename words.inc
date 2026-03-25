@@ -188,6 +188,11 @@ native "word", word
     push rdx
     jmp next
 
+native "branch", branch
+    add pc, [pc]
+    add pc, 8
+    jmp next
+
 native "0branch", branch0
     pop rax
     test rax, rax
