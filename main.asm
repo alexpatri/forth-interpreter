@@ -19,9 +19,7 @@ section .data
     ; program_stub é dividido em duas partes
     ; primeiro um espaço vazio para um xt (onde fica armazenado o xt da palavra lida em stdin)
     ; sedundo o xt do interpretador (é dessa forma que é feito o loop em next)
-    program_stub: dq 0
-    xt_interpreter: dq .interpreter
-    .interpreter: dq i_interpreter
+    program_stub: dq xt_interpreter
 
     ; necessário para modo de compilação
     state: dq 0

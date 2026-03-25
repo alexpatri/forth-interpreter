@@ -267,6 +267,11 @@ native "number", number
     push rdx
     jmp next
 
+native "exec", exec
+    pop rax
+    mov w, rax
+    jmp [rax]
+
 colon ">", is_greater
     dq xt_swap
     dq xt_is_less
@@ -316,8 +321,40 @@ colon ";", semicolon, 1
 native "init", init
     mov rstack, rstack_start
     mov [stack_base], rsp
-    jmp i_interpreter
+    mov pc, program_stub
+    jmp next 
 
+colon "interpreter", interpreter
+.start:
+    dq xt_inbuf
+    dq xt_word
+    branch0 .end
+
+    dq xt_inbuf
+    dq xt_find
+    dq xt_dup
+    branch0 .number
+
+    dq xt_cfa
+    dq xt_exec
+    branch .start
+
+.number:
+    dq xt_drop
+    dq xt_inbuf
+    dq xt_number
+    branch0 .not_found
+
+    branch .start
+
+.not_found:
+    branch .start
+
+.end:
+    dq xt_bye
+
+; LÓGICA ANTIGA
+; 
 ; quando é lido uma palavra:
 ; pc contem o mesmo que program_stub
 ; ou seja o primeiro elemento é o xt da palavra a ser executada e o segundo é o xt do interpreter
@@ -327,7 +364,7 @@ native "init", init
 ; pc contem xt do interpreter, dessa forma o `jump [w]` pula para o interpreter
 ;
 ; é dessa forma que funciona o loop do interpretador
-i_interpreter:
+interpreter:
     mov rdi, input_buffer
     call read_word
 
@@ -358,7 +395,7 @@ i_interpreter:
 
     push rax
 
-    jmp i_interpreter
+    jmp interpreter
 
 .exit:
     xor rdi, rdi
@@ -369,5 +406,4 @@ i_interpreter:
     call print
     call print_newline
 
-    jmp i_interpreter
-
+    jmp interpreter
