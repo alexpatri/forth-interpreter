@@ -12,7 +12,7 @@
 
 section .data
     hello_msg: db "Hello, World!", 10, 0
-    error_msg: db "The provided word does not exist.", 0
+    error_msg: db "The provided word does not exist.", 10, 0
 
     stack_base: dq 0
 

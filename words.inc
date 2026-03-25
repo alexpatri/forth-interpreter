@@ -348,11 +348,13 @@ colon "interpreter", interpreter
     dq xt_drop
     dq xt_inbuf
     dq xt_number
-    branch0 .not_found
-
-    branch .start
+    dq xt_not
+    branch0 .start
 
 .not_found:
+    dq xt_drop
+    dq xt_lit, error_msg 
+    dq xt_print
     branch .start
 
 .end:
