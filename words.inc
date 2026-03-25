@@ -260,6 +260,13 @@ native "cfa", cfa
     push rax
     jmp next
 
+native "number", number
+    pop rdi
+    call parse_int
+    push rax
+    push rdx
+    jmp next
+
 colon ">", is_greater
     dq xt_swap
     dq xt_is_less
@@ -363,5 +370,4 @@ i_interpreter:
     call print_newline
 
     jmp i_interpreter
-
 
