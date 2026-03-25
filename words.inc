@@ -249,6 +249,12 @@ native "find", find
     push rax
     jmp next
 
+native "cfa", cfa
+    pop rdi
+    call code_from_addr
+    push rax
+    jmp next
+
 colon ">", is_greater
     dq xt_swap
     dq xt_is_less
