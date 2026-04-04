@@ -341,6 +341,23 @@ colon "interpreter", interpreter
     branch0 .number
 
     dq xt_cfa
+
+    dq xt_state, xt_fetch
+    branch0 .execute
+
+    ; se a palavra estivar marcada como imediata é
+    ; executada mesmo em modo de compilação
+    dq xt_dup
+    dq xt_lit, 1
+    dq xt_sub
+    dq xt_fetch_char
+    dq xt_not
+    branch0 .execute
+
+    dq xt_comma
+    branch .start
+
+.execute: 
     dq xt_exec
     branch .start
 
