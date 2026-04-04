@@ -225,11 +225,10 @@ native "create", create
     mov [rsi], rcx
     mov [last_word], rsi
     add rsi, 8
-    mov byte [rsi], 0
-    inc rsi
-    
+
     pop rdi
     push rsi
+    mov rdx, 255
     call string_copy
     pop rsi
     push rsi
@@ -311,7 +310,7 @@ colon ":", colon
     dq xt_state
     dq xt_lit, 1
     dq xt_store
-    dq xt_lit, xt_docol
+    dq xt_lit, i_docol
     dq xt_comma
     dq xt_exit
 
