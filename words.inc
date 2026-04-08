@@ -276,6 +276,16 @@ native "exec", exec
     mov w, rax
     jmp [rax]
 
+native "r>", rpop
+    rpop rax
+    push rax
+    jmp next
+
+native ">r", rpush
+    pop rax
+    rpush rax
+    jmp next
+
 colon ">", is_greater
     dq xt_swap
     dq xt_is_less

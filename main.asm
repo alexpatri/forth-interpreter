@@ -27,7 +27,7 @@ section .data
     last_word: dq LAST_WORD
 
 section .bss
-    ; pilha para 'colon'
+    ; pilha de retorno
     resq 1023
     rstack_start: resq 1
 
