@@ -171,6 +171,10 @@ native "state", state
     push qword state
     jmp next
 
+native "here", here
+    push qword here
+    jmp next
+
 native "lit", lit
     push qword [pc]
     add pc, 8
@@ -374,8 +378,32 @@ colon "interpreter", interpreter
     dq xt_drop
     dq xt_inbuf
     dq xt_number
-    dq xt_not
+    branch0 .not_found
+
+    dq xt_state, xt_fetch
     branch0 .start
+
+    dq xt_here
+    dq xt_lit, 8
+    dq xt_sub
+    dq xt_lit, xt_branch0
+    dq xt_is_equal
+    dq xt_not
+    branch0 .is_branch
+
+    dq xt_here
+    dq xt_lit, 8
+    dq xt_sub
+    dq xt_lit, xt_branch
+    dq xt_is_equal
+    dq xt_not
+    branch0 .is_branch
+ 
+    dq xt_lit, xt_lit, xt_comma
+
+.is_branch:
+    dq xt_comma
+    branch .start
 
 .not_found:
     dq xt_drop
