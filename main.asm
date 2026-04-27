@@ -11,6 +11,7 @@
 %include "words.inc"
 
 section .data
+    input_msg: db ">> ", 0
     hello_msg: db "Hello, World!", 10, 0
     error_msg: db "The provided word does not exist.", 10, 0
 

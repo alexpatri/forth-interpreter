@@ -1,4 +1,3 @@
-section .text
 global strlen
 global print
 global print_char
@@ -13,6 +12,13 @@ global parse_int
 global string_equals
 global string_copy
 global exit
+
+global newline_flag
+
+section .data
+    newline_flag: db 1
+
+section .text
 
 ; rdi recebe o código de saída
 ; executa a chamada de sistema exite
@@ -230,22 +236,23 @@ read:
 ; lê a próxima palavra de stdin e retorna o endereço do buffer
 read_word:
     push r14
-    xor r14, r14 
+    xor r14, r14
 
 .A:
     push rdi
     call read_char
     pop rdi
+    cmp al, 10
+    je .newline
     cmp al, ' '
     je .A
-    cmp al, 10
-    je .A
     cmp al, 13
-    je .A 
-    cmp al, 9 
+    je .A
+    cmp al, 9
     je .A
     test al, al
     jz .C
+    jmp .B
 
 .B:
     mov byte [rdi + r14], al
@@ -254,20 +261,24 @@ read_word:
     push rdi
     call read_char
     pop rdi
+    cmp al, 10
+    je .newline
     cmp al, ' '
     je .C
-    cmp al, 10
-    je .C
     cmp al, 13
-    je .C 
+    je .C
     cmp al, 9
     je .C
     test al, al
     jz .C
     cmp r14, 254
-    je .C 
+    je .C
 
     jmp .B
+
+.newline:
+    mov byte [newline_flag], 1
+    jmp .C
 
 .C:
     mov byte [rdi + r14], 0

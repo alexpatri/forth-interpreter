@@ -20,4 +20,6 @@ extern find_word
 
 extern code_from_addr
 
+extern newline_flag
+
 %endif

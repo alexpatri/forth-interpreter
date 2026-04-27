@@ -346,11 +346,21 @@ native "init", init
     mov pc, program_stub
     jmp next 
 
+native "prompt", prompt
+    cmp byte [newline_flag], 0
+    je .skip
+    mov rdi, input_msg
+    call print
+    mov byte [newline_flag], 0
+    .skip:
+    jmp next
+
 colon "interpreter", interpreter
 .start:
+    dq xt_prompt
     dq xt_inbuf
     dq xt_word
-    branch0 .end
+    branch0 .empty
 
     dq xt_inbuf
     dq xt_find
@@ -411,8 +421,14 @@ colon "interpreter", interpreter
 
 .not_found:
     dq xt_drop
-    dq xt_lit, error_msg 
+    dq xt_lit, error_msg
     dq xt_print
+    branch .start
+
+.empty:
+    dq xt_lit, newline_flag
+    dq xt_fetch_char
+    branch0 .end
     branch .start
 
 .end:
