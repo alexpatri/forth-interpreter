@@ -1,5 +1,5 @@
 # Executável
-TARGET := main
+TARGET := forthress
 
 # Ferramentas
 ASM := nasm
