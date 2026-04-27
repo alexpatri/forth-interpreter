@@ -290,6 +290,10 @@ native ">r", rpush
     rpush rax
     jmp next
 
+native "r@", rcopy
+    push qword [rstack]
+    jmp next
+
 colon ">", is_greater
     dq xt_swap
     dq xt_is_less
