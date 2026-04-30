@@ -21,5 +21,6 @@ extern find_word
 extern code_from_addr
 
 extern newline_flag
+extern line_start
 
 %endif

@@ -14,9 +14,11 @@ global string_copy
 global exit
 
 global newline_flag
+global line_start
 
 section .data
     newline_flag: db 1
+    line_start: db 1
 
 section .text
 
@@ -58,6 +60,15 @@ print:
     mov rdi, 1
     syscall
 
+    test rdx, rdx
+    jz .end
+    cmp byte [rsi + rdx - 1], 10
+    je .nl
+    mov byte [line_start], 0
+    ret
+.nl:
+    mov byte [line_start], 1
+.end:
     ret
 
 ; rdi recebe o código de um caractere diretamente
@@ -75,6 +86,12 @@ print_char:
     syscall
 
     pop rdi
+    cmp rdi, 10
+    je .nl
+    mov byte [line_start], 0
+    ret
+.nl:
+    mov byte [line_start], 1
     ret
 
 ; imprime o caractere newline
@@ -132,6 +149,8 @@ print_uint:
     mov rdi, 1
     mov rdx, rcx
     syscall
+
+    mov byte [line_start], 0
 
     ; voltando ao estado original da pilha e dos registradores callee-saved
     add rsp, 32
@@ -278,6 +297,7 @@ read_word:
 
 .newline:
     mov byte [newline_flag], 1
+    mov byte [line_start], 1
     jmp .C
 
 .C:

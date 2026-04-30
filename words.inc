@@ -192,6 +192,13 @@ native "word", word
     push rdx
     jmp next
 
+native "input", input
+    pop rdi
+    mov rsi, 128
+    call read
+    push rax
+    jmp next
+
 native "branch", branch
     add pc, [pc]
     add pc, 8
@@ -349,10 +356,14 @@ native "init", init
 native "prompt", prompt
     cmp byte [newline_flag], 0
     je .skip
+    cmp byte [line_start], 0
+    jne .print
+    call print_newline
+.print:
     mov rdi, input_msg
     call print
     mov byte [newline_flag], 0
-    .skip:
+.skip:
     jmp next
 
 colon "interpreter", interpreter
